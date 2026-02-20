@@ -1,7 +1,20 @@
 ﻿@model WeatherModel
 
-<div class="weather-widget">
-    <h4 class="mb-4">🌤 Погода сейчас</h4>
+<div class="weather-widget d-flex flex-column h-100">
+    <h4 class="mb-3">🌤 Погода сейчас</h4>
+
+    <!-- Форма для выбора города (отправляет GET) -->
+    <form method="get" id="cityForm" class="mb-3">
+        <select name="city" id="citySelector" class="form-select" onchange="this.form.submit()">
+            <option value="Москва" selected="@(Model?.City == "Москва")">Москва</option>
+            
+            <option value="Казань" selected="@(Model?.City == "Казань")">Казань</option>
+            <option value="Новосибирск" selected="@(Model?.City == "Новосибирск")">Новосибирск</option>
+            <option value="Екатеринбург" selected="@(Model?.City == "Екатеринбург")">Екатеринбург</option>
+        </select>
+    </form>
+
+    <!-- Данные о погоде -->
     <div id="weather-content">
         <p><strong>📍 Город:</strong> <span id="city">@(Model?.City ?? "Неизвестно")</span></p>
         <p><strong>🌡 Температура:</strong> <span id="temp">@(Model?.Temperature ?? 0)</span>°C</p>
@@ -9,35 +22,40 @@
         <p class="display-6 mt-3" id="weather-desc">@(Model?.Description ?? "Загрузка...")</p>
     </div>
 
-    <div class="mt-4 d-flex gap-2">
-        <button id="refreshWeather" class="btn btn-outline-primary btn-sm">🔄 Обновить</button>
-        <a id="goToCloud" href="/Cloud?weather=@Model?.Description" class="btn btn-outline-info btn-sm">☁️ Облака</a>
+    <!-- Кнопки внизу -->
+    <div class="mt-auto d-flex gap-2">
+        <!-- Кнопка "Обновить" перезагружает страницу с тем же городом -->
+        <button type="button" id="refreshWeather" class="btn btn-outline-primary btn-sm flex-fill"
+                onclick="window.location.href = window.location.pathname + '?city=' + document.getElementById('citySelector').value">
+            🔄 Обновить
+        </button>
+        <!-- Ссылка на облака с текущим городом -->
+        <a id="goToCloud" href="/Cloud?city=@(Model?.City)" class="btn btn-outline-info btn-sm flex-fill">
+            ☁️ Облака
+        </a>
     </div>
 </div>
 
+<!-- Можно оставить небольшой скрипт для синхронизации ссылки при ручном изменении (но необязательно) -->
 <script>
-    async function loadWeather() {
-        const url = '@Url.Action("GetWeatherJson", "Home")';
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.error) {
-                console.error(data.error);
-                return;
-            }
-            
-            document.getElementById('city').innerText = data.city;
-            document.getElementById('temp').innerText = data.temperature;
-            document.getElementById('wind').innerText = data.windSpeed;
-            document.getElementById('weather-desc').innerText = data.description;
-            
-            const cloudLink = document.getElementById('goToCloud');
-            cloudLink.href = `/Cloud?weather=${encodeURIComponent(data.description)}`;
-        } catch (error) {
-            console.error('Ошибка обновления погоды:', error);
-        }
-    }
-
-    document.getElementById('refreshWeather')?.addEventListener('click', loadWeather);
+    // Если пользователь изменит город через консоль или случайно – обновим ссылку
+    document.getElementById('citySelector')?.addEventListener('change', function() {
+        document.getElementById('goToCloud').href = '/Cloud?city=' + encodeURIComponent(this.value);
+    });
 </script>
+
+<style>
+    .weather-widget {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(8px);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+    }
+    .mt-auto {
+        margin-top: auto !important;
+    }
+</style>

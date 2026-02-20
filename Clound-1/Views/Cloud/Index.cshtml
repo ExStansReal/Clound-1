@@ -1,26 +1,13 @@
 ﻿@model List<CloudModel>
 
-@{
-    ViewData["Title"] = "Clouds";
-    var weatherDesc = ViewBag.WeatherDescription ?? "неизвестно";
-}
-
-
-
-
 <link rel="stylesheet" href="~/css/cloud.css" asp-append-version="true" />
-
-
 
 <div class="sky">
     @foreach (var cloud in Model)
     {
         var animationName = cloud.Direction == "left" ? "flyLeft" : "flyRight";
         var animation = $"{animationName} {cloud.DurationSeconds}s linear {cloud.DelaySeconds}s infinite";
-
-        // Начальное положение — строго за краем экрана
         var initialLeft = cloud.Direction == "left" ? "calc(100% + 500px)" : "-500px";
-
         <div class="cloud" style="top: @cloud.TopPercent%; left: @initialLeft; animation: @animation;">
             <img src="@cloud.ImageSrc" style="width: @(cloud.WidthPixels)px;" />
         </div>

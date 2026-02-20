@@ -3,8 +3,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Регистрируем IHttpClientFactory
-builder.Services.AddHttpClient();
+
+
+builder.Services.AddHttpClient("WeatherClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 var app = builder.Build();
 
