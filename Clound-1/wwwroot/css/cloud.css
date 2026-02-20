@@ -1,0 +1,44 @@
+﻿.sky {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    background: linear-gradient(to bottom, #87CEEB, #b0e0e6);
+    overflow: hidden;
+    border-radius: 20px;
+    margin: 20px 0;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.cloud {
+    position: absolute;
+    opacity: 0.9;
+    pointer-events: none;
+    animation-fill-mode: backwards;
+}
+
+    .cloud img {
+        width: 100%;
+        height: auto;
+    }
+
+@keyframes flyRight {
+    0% {
+        left: -500px;
+    }
+    /* полностью слева за контейнером */
+    100% {
+        left: calc(100% + 500px);
+    }
+    /* полностью справа за контейнером */
+}
+
+@keyframes flyLeft {
+    0% {
+        left: calc(100% + 500px);
+    }
+
+    100% {
+        left: -500px;
+    }
+}
+}

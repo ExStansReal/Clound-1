@@ -1,0 +1,25 @@
+﻿@model List<CloudModel>
+
+@{
+    ViewData["Title"] = "Clouds";
+}
+
+<link rel="stylesheet" href="~/css/cloud.css" />
+
+<h1>@ViewData["Title"]</h1>
+<p>Облака плывут по небу...</p>
+
+<div class="sky">
+    @foreach (var cloud in Model)
+    {
+        var animationName = cloud.Direction == "left" ? "flyLeft" : "flyRight";
+        var animation = $"{animationName} {cloud.DurationSeconds}s linear {cloud.DelaySeconds}s infinite";
+
+        // Начальное положение — строго за краем экрана
+        var initialLeft = cloud.Direction == "left" ? "calc(100% + 500px)" : "-500px";
+
+        <div class="cloud" style="top: @cloud.TopPercent%; left: @initialLeft; animation: @animation;">
+            <img src="@cloud.ImageSrc" style="width: @(cloud.WidthPixels)px;" />
+        </div>
+    }
+</div>
