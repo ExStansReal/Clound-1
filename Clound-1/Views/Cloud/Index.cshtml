@@ -2,12 +2,15 @@
 
 @{
     ViewData["Title"] = "Clouds";
+    var weatherDesc = ViewBag.WeatherDescription ?? "неизвестно";
 }
 
-<link rel="stylesheet" href="~/css/cloud.css" />
 
-<h1>@ViewData["Title"]</h1>
-<p>Облака плывут по небу...</p>
+
+
+<link rel="stylesheet" href="~/css/cloud.css" asp-append-version="true" />
+
+
 
 <div class="sky">
     @foreach (var cloud in Model)

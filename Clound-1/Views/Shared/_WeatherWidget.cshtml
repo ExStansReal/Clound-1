@@ -1,0 +1,43 @@
+﻿@model WeatherModel
+
+<div class="weather-widget">
+    <h4 class="mb-4">🌤 Погода сейчас</h4>
+    <div id="weather-content">
+        <p><strong>📍 Город:</strong> <span id="city">@(Model?.City ?? "Неизвестно")</span></p>
+        <p><strong>🌡 Температура:</strong> <span id="temp">@(Model?.Temperature ?? 0)</span>°C</p>
+        <p><strong>💨 Ветер:</strong> <span id="wind">@(Model?.WindSpeed ?? 0)</span> км/ч</p>
+        <p class="display-6 mt-3" id="weather-desc">@(Model?.Description ?? "Загрузка...")</p>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button id="refreshWeather" class="btn btn-outline-primary btn-sm">🔄 Обновить</button>
+        <a id="goToCloud" href="/Cloud?weather=@Model?.Description" class="btn btn-outline-info btn-sm">☁️ Облака</a>
+    </div>
+</div>
+
+<script>
+    async function loadWeather() {
+        const url = '@Url.Action("GetWeatherJson", "Home")';
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+            
+            document.getElementById('city').innerText = data.city;
+            document.getElementById('temp').innerText = data.temperature;
+            document.getElementById('wind').innerText = data.windSpeed;
+            document.getElementById('weather-desc').innerText = data.description;
+            
+            const cloudLink = document.getElementById('goToCloud');
+            cloudLink.href = `/Cloud?weather=${encodeURIComponent(data.description)}`;
+        } catch (error) {
+            console.error('Ошибка обновления погоды:', error);
+        }
+    }
+
+    document.getElementById('refreshWeather')?.addEventListener('click', loadWeather);
+</script>

@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Clound_1.Models
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -6,9 +7,15 @@
     <title>@ViewData["Title"] - Clound_1</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Clound_1.styles.css" asp-append-version="true" />
+
+
 </head>
 <body>
+    
+    
+
+   
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -17,22 +24,40 @@
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Cloud" asp-action="Index">Облочность</a>
                         </li>
                     </ul>
                 </div>
+
+                <div class="volume-control ms-auto d-flex align-items-center">
+                    <label for="volumeSlider" class="me-1" style="font-size: 1.2rem;">🔊</label>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.7" style="width: 100px;">
+                </div>
+
             </div>
         </nav>
     </header>
+
+    <div class="container-fluid h-100 d-flex flex-column">
+        <div class="row flex-grow-1 g-0">
+            <!-- Левая колонка с погодой (на всю высоту) -->
+            <div class="col-md-3 sidebar d-flex flex-column">
+                @await Html.PartialAsync("_WeatherWidget", (WeatherModel)ViewBag.Weather)
+            </div>
+            <!-- Правая колонка с основным контентом -->
+            <div class="col-md-9 p-4">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -40,18 +65,16 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Clound_1 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
+        
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/music-player.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 <!-- Скрытый аудиоплеер -->
 <audio id="bg-music" loop style="display: none;"></audio>
 
-<!-- Подключаем внешний скрипт для музыки -->
-<script src="~/js/music-player.js"></script>
+
 </html>

@@ -1,84 +1,148 @@
 ﻿// music-player.js
 
-// Настройки музыки для разных страниц
 const musicTracks = {
-    home: '/music/home-theme.mp3',
-    cloud: '/music/cloud-theme.mp3'
+    home: '/music/main.mp3',
+    cloud: '/music/cloud.mp3',
+    rain: '/music/rain.mp3',
+    snow: '/music/snow.mp3',
+    sun: '/music/sun.mp3'
 };
 
 let fadeInterval = null;
+let audioElement = null;
+let volumeSlider = null; // ссылка на ползунок
 
-// Функция плавного изменения громкости (fade)
+// Сохранённая громкость (по умолчанию 0.7)
+let savedVolume = localStorage.getItem('musicVolume');
+if (savedVolume === null) savedVolume = 0.7;
+else savedVolume = parseFloat(savedVolume);
+
+// Обновление положения слайдера
+function updateVolumeSlider(value) {
+    if (volumeSlider) {
+        volumeSlider.value = value;
+    }
+}
+
+// Инициализация слайдера
+function initVolumeSlider() {
+    volumeSlider = document.getElementById('volumeSlider');
+    if (!volumeSlider) return;
+
+    // Устанавливаем начальное значение из сохранённого
+    volumeSlider.value = savedVolume;
+
+    // Обработчик изменения слайдера
+    volumeSlider.addEventListener('input', function (e) {
+        const val = parseFloat(e.target.value);
+        if (audioElement) {
+            audioElement.volume = val;
+        }
+        // Сохраняем в localStorage
+        localStorage.setItem('musicVolume', val);
+        // Если идёт fade, прерываем его
+        if (fadeInterval) {
+            clearInterval(fadeInterval);
+            fadeInterval = null;
+        }
+    });
+}
+
+// Создание нового аудиоэлемента (чистый старт)
+function createAudioElement(src) {
+    const audio = new Audio();
+    audio.src = src;
+    audio.loop = true;
+    audio.volume = 0; // начинаем с нуля
+    audio.preload = 'auto';
+    return audio;
+}
+
+// Плавное изменение громкости
 function fadeVolume(targetVolume, duration, callback) {
-    const audio = document.getElementById('bg-music');
-    if (!audio) return;
+    if (!audioElement) return;
 
     if (fadeInterval) clearInterval(fadeInterval);
 
     const steps = 20;
     const stepTime = duration / steps;
-    const startVolume = audio.volume;
+    const startVolume = audioElement.volume;
     const volumeStep = (targetVolume - startVolume) / steps;
     let currentStep = 0;
 
     fadeInterval = setInterval(() => {
         currentStep++;
-        audio.volume = startVolume + (volumeStep * currentStep);
+        const newVol = startVolume + (volumeStep * currentStep);
+        audioElement.volume = newVol;
+        updateVolumeSlider(newVol); // обновляем слайдер
 
         if (currentStep >= steps) {
             clearInterval(fadeInterval);
             fadeInterval = null;
-            audio.volume = targetVolume;
+            audioElement.volume = targetVolume;
+            updateVolumeSlider(targetVolume);
             if (callback) callback();
         }
     }, stepTime);
 }
 
-// Функция смены трека с плавным переходом
+// Смена трека с плавным переходом
 function changeTrack(newSrc) {
-    const audio = document.getElementById('bg-music');
-    if (!audio) return;
+    // Если нет audioElement или первый запуск
+    if (!audioElement) {
+        audioElement = createAudioElement(newSrc);
+        document.body.appendChild(audioElement);
 
-    // Если это первый запуск (audio ещё не инициализирован)
-    if (!audio.src || audio.src === '') {
-        audio.src = newSrc;
-        audio.volume = 0.7;
-
-        // Пытаемся воспроизвести
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.log('Автовоспроизведение заблокировано. Показываем кнопку.');
-                showMusicStartButton();
-            });
-        }
+        setTimeout(() => {
+            const playPromise = audioElement.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        // Стартуем с громкостью из savedVolume, но плавно
+                        audioElement.volume = 0;
+                        fadeVolume(savedVolume, 1000);
+                    })
+                    .catch(error => {
+                        console.log('Автовоспроизведение заблокировано.');
+                        showMusicStartButton(newSrc);
+                    });
+            }
+        }, 100);
         return;
     }
 
-    // Если трек уже играет, делаем fade out, меняем трек, затем fade in
-    if (audio.src.includes(newSrc)) return;
+    if (audioElement.src.includes(newSrc)) return;
 
     fadeVolume(0, 1000, () => {
-        audio.src = newSrc;
-        audio.play();
-        fadeVolume(0.7, 1000);
+        const oldAudio = audioElement;
+        audioElement = createAudioElement(newSrc);
+        document.body.appendChild(audioElement);
+
+        setTimeout(() => {
+            oldAudio.pause();
+            oldAudio.remove();
+        }, 100);
+
+        setTimeout(() => {
+            audioElement.play()
+                .then(() => {
+                    audioElement.volume = 0;
+                    fadeVolume(savedVolume, 1000);
+                })
+                .catch(err => console.error('Не удалось запустить новый трек:', err));
+        }, 150);
     });
 }
 
-// Определяем текущую страницу по data-атрибуту
+// Определение текущей страницы
 function getCurrentPage() {
     const identifier = document.getElementById('page-identifier');
-    if (identifier) {
-        return identifier.dataset.page;
-    }
-    // Fallback на определение по URL
-    const path = window.location.pathname.toLowerCase();
-    return path.includes('cloud') ? 'cloud' : 'home';
+    if (identifier) return identifier.dataset.page;
+    return window.location.pathname.toLowerCase().includes('cloud') ? 'cloud' : 'home';
 }
 
-// Кнопка для запуска музыки (если браузер заблокировал автовоспроизведение)
-function showMusicStartButton() {
-    // Проверяем, не была ли кнопка уже добавлена
+// Кнопка для ручного запуска
+function showMusicStartButton(trackSrc) {
     if (document.getElementById('music-start-btn')) return;
 
     const btn = document.createElement('button');
@@ -97,10 +161,17 @@ function showMusicStartButton() {
     btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
 
     btn.onclick = function () {
-        const audio = document.getElementById('bg-music');
-        audio.play();
-        audio.volume = 0.7;
-        btn.remove();
+        if (!audioElement) {
+            audioElement = createAudioElement(trackSrc);
+            document.body.appendChild(audioElement);
+        }
+        audioElement.volume = 0;
+        audioElement.play()
+            .then(() => {
+                fadeVolume(savedVolume, 1000);
+                btn.remove();
+            })
+            .catch(err => console.error('Ошибка:', err));
     };
 
     document.body.appendChild(btn);
@@ -108,15 +179,17 @@ function showMusicStartButton() {
 
 // Обработка переходов по ссылкам
 function setupLinkHandler() {
+    let isNavigating = false;
+
     document.addEventListener('click', function (e) {
         const link = e.target.closest('a');
-        if (!link) return;
+        if (!link || isNavigating) return;
 
         const href = link.getAttribute('href');
         if (href && !href.startsWith('http') && !href.startsWith('#') && !href.startsWith('javascript')) {
             e.preventDefault();
+            isNavigating = true;
 
-            // Плавно убираем звук
             fadeVolume(0, 500, () => {
                 window.location.href = href;
             });
@@ -124,8 +197,15 @@ function setupLinkHandler() {
     });
 }
 
+// Функция для будущей погоды
+function setMusicByWeather(weatherCondition) {
+    const trackKey = musicTracks[weatherCondition] ? weatherCondition : 'home';
+    changeTrack(musicTracks[trackKey]);
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function () {
+    initVolumeSlider();             // инициализируем слайдер
     const page = getCurrentPage();
     changeTrack(musicTracks[page]);
     setupLinkHandler();

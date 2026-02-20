@@ -1,6 +1,3 @@
-html {
-  font-size: 14px;
-}
 
 @media (min-width: 768px) {
   html {
@@ -8,11 +5,91 @@ html {
   }
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
 
 body {
   margin-bottom: 60px;
+}
+
+.volume-control {
+    color: #333; /* или цвет текста твоего меню */
+}
+
+    .volume-control label {
+        cursor: pointer;
+        margin-right: 5px;
+    }
+
+#volumeSlider {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* === Стили для сайдбара (из _Layout.cshtml) === */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* убирает глобальную прокрутку */
+    margin-bottom: 60px;
+    font-size: 14px;
+}
+
+.full-height {
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: linear-gradient(145deg, #d4e9ff 0%, #b0d4f0 100%);
+    padding: 1.5rem;
+    border-right: 1px solid #9bb7d4;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+}
+
+/* === Стили для виджета погоды (из _WeatherWidget.cshtml) === */
+.weather-widget {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.5);
+}
+
+    .weather-widget h4 {
+        color: #05445e;
+        font-weight: 600;
+    }
+
+    .weather-widget p {
+        color: #04293a;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+#weather-desc {
+    font-size: 2rem;
+    text-align: center;
+    background: rgba(255,255,255,0.4);
+    border-radius: 40px;
+    padding: 0.5rem;
+}
+
+.container-fluid {
+    height: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.row {
+    height: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.sidebar, .col-md-9 {
+    overflow-y: auto; /* если контента много, появится скролл внутри колонки */
+    height: 100%;
 }
