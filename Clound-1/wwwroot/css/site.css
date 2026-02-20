@@ -12,6 +12,7 @@ body {
 
 .volume-control {
     color: #333; /* или цвет текста твоего меню */
+    margin-right: 1.5rem;
 }
 
     .volume-control label {
@@ -92,4 +93,5 @@ html, body {
 .sidebar, .col-md-9 {
     overflow-y: auto; /* если контента много, появится скролл внутри колонки */
     height: 100%;
+    padding: 2rem;
 }
