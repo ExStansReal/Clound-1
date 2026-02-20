@@ -5,9 +5,9 @@
 
     <!-- Форма для выбора города (отправляет GET) -->
     <form method="get" id="cityForm" class="mb-3">
-        <select name="city" id="citySelector" class="form-select" onchange="this.form.submit()">
+        <select name="city" id="citySelector" class="form-select">
             <option value="Москва" selected="@(Model?.City == "Москва")">Москва</option>
-            
+           
             <option value="Казань" selected="@(Model?.City == "Казань")">Казань</option>
             <option value="Новосибирск" selected="@(Model?.City == "Новосибирск")">Новосибирск</option>
             <option value="Екатеринбург" selected="@(Model?.City == "Екатеринбург")">Екатеринбург</option>
@@ -36,12 +36,20 @@
     </div>
 </div>
 
-<!-- Можно оставить небольшой скрипт для синхронизации ссылки при ручном изменении (но необязательно) -->
+
 <script>
-    // Если пользователь изменит город через консоль или случайно – обновим ссылку
+
     document.getElementById('citySelector')?.addEventListener('change', function() {
+         const city = this.value;
+        window.location.href = '/Cloud?city=' + encodeURIComponent(city);
         document.getElementById('goToCloud').href = '/Cloud?city=' + encodeURIComponent(this.value);
     });
+
+        document.getElementById('refreshWeather')?.addEventListener('click', function() {
+        const city = document.getElementById('citySelector').value;
+        window.location.href = window.location.pathname + '?city=' + encodeURIComponent(city);
+    });
+
 </script>
 
 <style>
